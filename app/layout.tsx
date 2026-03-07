@@ -1,5 +1,7 @@
-//added gobalstyle
+//global styles
 import "@/app/ui/global.css";
+import { roboto_flex } from "@/app/ui/fonts";
+
 export default function RootLayout({
   children,
 }: {
@@ -7,7 +9,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={`${roboto_flex.className} antialiased`}>{children}</body>
     </html>
   );
 }
