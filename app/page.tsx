@@ -35,17 +35,17 @@ export default function Page() {
           {/* Add Hero Images Here */}
           <Image
             src="/hero-desktop.png"
-            alt="Screenshot of the Acme dashboard across multiple devices"
-            width={800}
-            height={600}
-            className="hiden md:block"
+            width={1000}
+            height={760}
+            className={styles.desktopImage}
+            alt="Screenshots of the dashboard project showing desktop version"
           />
           <Image
             src="/hero-mobile.png"
-            alt="Screenshot of the Acme dashboard on a mobile device"
             width={560}
             height={620}
-            className="block md:hidden"
+            className={styles.mobileImage}
+            alt="Screenshot of the dashboard project showing mobile version"
           />
         </div>
       </div>

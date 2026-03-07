@@ -5,3 +5,17 @@
   border-left: 20px solid transparent;
   border-right: 20px solid transparent;
 }
+.desktopImage {
+  display: block;
+}
+.mobileImage {
+  display: none;
+}
+@media (max-width: 768px) {
+  .desktopImage {
+    display: none;
+  }
+  .mobileImage {
+    display: block;
+  }
+}
