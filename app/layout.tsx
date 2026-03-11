@@ -1,6 +1,6 @@
 //global styles
-import "@/app/ui/global.css";
-import { roboto_flex } from "@/app/ui/fonts";
+import "@/app/css/global.css";
+import { roboto_flex } from "@/app/font/fonts";
 
 export default function RootLayout({
   children,
