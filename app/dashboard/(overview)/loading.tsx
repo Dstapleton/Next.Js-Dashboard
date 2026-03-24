@@ -1,4 +1,5 @@
-import DashBoardSkeleletons from "@/app/ui/skeletons";
+import DashBoardSkeleletons from '@/app/ui/skeletons'
+
 export default function Loading() {
-  return <DashBoardSkeleletons />;
+  return <DashBoardSkeleletons />
 }
