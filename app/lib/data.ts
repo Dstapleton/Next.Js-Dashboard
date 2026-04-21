@@ -1,4 +1,4 @@
-import postgres from 'postgres'
+import postgres, { Sql } from 'postgres'
 import {
   CustomerField,
   CustomersTableType,
@@ -9,7 +9,17 @@ import {
 } from './definitions'
 import { formatCurrency } from './utils'
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' })
+// Ensure the DATABASE_URL environment variable is set before initializing the Postgres client
+const postgresUrl = process.env.DATABASE_URL
+
+// Ensure the DATABASE_URL environment variable is set before initializing the Postgres client
+if (!postgresUrl) {
+  throw new Error(
+    'POSTGRES_URL environment variable is not set. Please check your .env.local file.',
+  )
+}
+// Initialize the Postgres client using the connection string from environment variables
+const sql: Sql = postgres(postgresUrl, { ssl: 'require' })
 
 export async function fetchRevenue() {
   try {
@@ -70,8 +80,8 @@ export async function fetchCardData() {
 
     const numberOfInvoices = Number(data[0][0].count ?? '0')
     const numberOfCustomers = Number(data[1][0].count ?? '0')
-    const totalPaidInvoices = formatCurrency(data[2][0].paid ?? '0')
-    const totalPendingInvoices = formatCurrency(data[2][0].pending ?? '0')
+    const totalPaidInvoices = formatCurrency(Number(data[2][0].paid ?? '0'))
+    const totalPendingInvoices = formatCurrency(Number(data[2][0].pending ?? '0'))
 
     return {
       numberOfCustomers,

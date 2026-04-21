@@ -1,11 +1,17 @@
-import bcrypt from 'bcrypt';
-import postgres from 'postgres';
-import { invoices, customers, revenue, users } from '../lib/placeholder-data';
+import bcrypt from 'bcrypt'
+import postgres from 'postgres'
+import { invoices, customers, revenue, users } from '../lib/placeholder-data'
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+const postgresUrl = process.env.POSTGRES_URL
+if (!postgresUrl) {
+  throw new Error('POSTGRES_URL environment variable is not set')
+}
+
+// This is an API route that will be called from the client to seed the database with initial data. You can create as many API routes as you need, and they will be automatically available under the /api directory. For example, if you create a file called /app/seed/route.ts, it will be available at /api/seed.
+const sql = postgres(postgresUrl, { ssl: 'require' })
 
 async function seedUsers() {
-  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`
   await sql`
     CREATE TABLE IF NOT EXISTS users (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -13,24 +19,24 @@ async function seedUsers() {
       email TEXT NOT NULL UNIQUE,
       password TEXT NOT NULL
     );
-  `;
+  `
 
   const insertedUsers = await Promise.all(
     users.map(async (user) => {
-      const hashedPassword = await bcrypt.hash(user.password, 10);
+      const hashedPassword = await bcrypt.hash(user.password, 10)
       return sql`
         INSERT INTO users (id, name, email, password)
         VALUES (${user.id}, ${user.name}, ${user.email}, ${hashedPassword})
         ON CONFLICT (id) DO NOTHING;
-      `;
+      `
     }),
-  );
+  )
 
-  return insertedUsers;
+  return insertedUsers
 }
 
 async function seedInvoices() {
-  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`
 
   await sql`
     CREATE TABLE IF NOT EXISTS invoices (
@@ -40,7 +46,7 @@ async function seedInvoices() {
       status VARCHAR(255) NOT NULL,
       date DATE NOT NULL
     );
-  `;
+  `
 
   const insertedInvoices = await Promise.all(
     invoices.map(
@@ -50,13 +56,13 @@ async function seedInvoices() {
         ON CONFLICT (id) DO NOTHING;
       `,
     ),
-  );
+  )
 
-  return insertedInvoices;
+  return insertedInvoices
 }
 
 async function seedCustomers() {
-  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`
 
   await sql`
     CREATE TABLE IF NOT EXISTS customers (
@@ -65,7 +71,7 @@ async function seedCustomers() {
       email VARCHAR(255) NOT NULL,
       image_url VARCHAR(255) NOT NULL
     );
-  `;
+  `
 
   const insertedCustomers = await Promise.all(
     customers.map(
@@ -75,9 +81,9 @@ async function seedCustomers() {
         ON CONFLICT (id) DO NOTHING;
       `,
     ),
-  );
+  )
 
-  return insertedCustomers;
+  return insertedCustomers
 }
 
 async function seedRevenue() {
@@ -86,7 +92,7 @@ async function seedRevenue() {
       month VARCHAR(4) NOT NULL UNIQUE,
       revenue INT NOT NULL
     );
-  `;
+  `
 
   const insertedRevenue = await Promise.all(
     revenue.map(
@@ -96,9 +102,9 @@ async function seedRevenue() {
         ON CONFLICT (month) DO NOTHING;
       `,
     ),
-  );
+  )
 
-  return insertedRevenue;
+  return insertedRevenue
 }
 
 export async function GET() {
@@ -108,10 +114,10 @@ export async function GET() {
       seedCustomers(),
       seedInvoices(),
       seedRevenue(),
-    ]);
+    ])
 
-    return Response.json({ message: 'Database seeded successfully' });
+    return Response.json({ message: 'Database seeded successfully' })
   } catch (error) {
-    return Response.json({ error }, { status: 500 });
+    return Response.json({ error }, { status: 500 })
   }
 }

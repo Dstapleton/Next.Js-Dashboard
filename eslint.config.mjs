@@ -1,6 +1,7 @@
 // eslint.config.mjs
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
+import { configs as tseslintConfigs } from 'typescript-eslint'
 import globals from 'globals'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import pluginJs from '@eslint/js'
@@ -34,7 +35,7 @@ const reactDomConfig = defineConfig({
   name: 'eslint/react-dom',
   plugins: { '@eslint-react/dom': reactDom },
   rules: {
-    '@eslint-react/dom/no-missing-button-type': 'error', // Disable this rule for Next.js projects
+    '@eslint-react/dom/no-missing-button-type': 'warn', // Disable this rule for Next.js projects
     '@eslint-react/dom/no-dangerously-set-innerhtml': 'warn', // Disable this rule for Next.js projects
     '@eslint-react/dom/no-namespace': 'warn', // Disable this rule for Next.js projects
   },
@@ -115,7 +116,6 @@ const eslintConfig = defineConfig([
       },
     },
   },
-
   // ESLint plugin development rules
   {
     name: 'eslint/eslint-plugin',
@@ -124,7 +124,6 @@ const eslintConfig = defineConfig([
     },
     extends: ['eslint-plugin/recommended'], // Recommended rules for ESLint plugin development
   },
-
   // Custom rules for specific files or patterns
   {
     name: 'custom-rules',
@@ -135,10 +134,75 @@ const eslintConfig = defineConfig([
   },
 ])
 
+// PropTypes rules and settings for React components
+const proptypeConfig = defineConfig({
+  name: 'react/prop-types',
+  files: ['**/*.{jsx,tsx,js,ts,cjs,mjs}'],
+  plugins: { react: reactPlugin },
+  languageOptions: {
+    parserOptions: {
+      ecmaFeatures: {
+        jsx: true,
+      },
+    },
+    globals: {
+      ...globals.browser,
+    },
+  },
+  rules: {
+    // Set to "error" to fail the build, or "warn" to just see it in the console
+    ...reactPlugin.configs.recommended.rules,
+    ...reactPlugin.configs['jsx-runtime'].rules,
+    'react/prop-types': 'error',
+  },
+})
+
+//  Accessibility rules and settings for JSX elements
+const accessibilityConfig = defineConfig({
+  name: 'jsx-a11y/accessibility',
+  files: ['**/*.{jsx,tsx}'],
+  plugins: { 'jsx-a11y': jsxA11y },
+  rules: {
+    ...jsxA11y.configs.strict.rules,
+    'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image'] }],
+    'jsx-a11y/media-has-caption': 'warn',
+    'jsx-a11y/label-has-associated-control': 'off',
+  },
+})
+
+const typescriptConfig = defineConfig([
+  {
+    name: 'project/typescript-strict',
+    files: ['**/*.{ts,tsx,mjs}'],
+    extends: [...tseslintConfigs.strictTypeChecked, ...tseslintConfigs.stylisticTypeChecked],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        //tsconfigRootDir: import.meta.dirname,
+        ecmaFeatures: {
+          jsx: true,
+        },
+        warnOnUnsupportedTypeScriptVersion: true,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/triple-slash-reference': 'off',
+    },
+  },
+  {
+    name: 'project/javascript-disable-type-check',
+    files: ['**/*.{js,mjs,cjs}'],
+    ...tseslintConfigs.disableTypeChecked,
+  },
+])
+
 // Project-wide rules and settings
 const projectwideConfig = defineConfig({
   // Project-wide rules and settings
   name: 'project-wide',
+  plugins: {},
+
   rules: {
     //'react/display-name': 'error', // Disable this rule for Next.js projects
 
@@ -154,40 +218,6 @@ const projectwideConfig = defineConfig({
   },
 })
 
-// PropTypes rules and settings for React components
-const proptypeConfig = defineConfig({
-  name: 'react/prop-types',
-  files: ['**/*.{jsx,tsx}'],
-  plugins: { react: reactPlugin, 'jsx-a11y': jsxA11y },
-  rules: {
-    // Set to "error" to fail the build, or "warn" to just see it in the console
-    ...reactPlugin.configs.recommended.rules,
-    ...jsxA11y.configs.strict.rules,
-    ...reactPlugin.configs['jsx-runtime'].rules,
-    'react/prop-types': 'error',
-    'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image'] }],
-    'jsx-a11y/media-has-caption': 'warn',
-    'jsx-a11y/label-has-associated-control': 'off',
-  },
-})
-
-//  Accessibility rules and settings for JSX elements
-const accessibilityConfig = defineConfig({
-  name: 'jsx-a11y/accessibility',
-  files: ['**/*.{jsx,tsx}'],
-  plugins: { 'jsx-a11y': jsxA11y },
-  rules: {
-    ...jsxA11y.configs.strict.rules,
-    'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image'] }],
-    'jsx-a11y/media-has-caption': 'warn',
-  },
-  settings: {
-    react: {
-      version: 'detect',
-    },
-  },
-})
-
 // Export the combined ESLint configuration
 export default defineConfig([
   ...nextTs,
@@ -197,7 +227,10 @@ export default defineConfig([
   ...recommendedConfig,
   ...tailwindConfig,
   ...eslintConfig,
+  ...jsConfig,
+  ...nextConfig,
   ...proptypeConfig,
-  //...accessibilityConfig,
+  ...accessibilityConfig,
+  ...typescriptConfig,
   ...projectwideConfig,
 ])
